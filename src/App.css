@@ -201,6 +201,13 @@ table th {
 
 
 @media print{
+  .todoList-div {
+    width: 100vw; 
+    max-width: 100%;
+  }
+  table {
+    width: 100%; 
+  }
   .form-div{
     display: none;
   }

@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import html2pdf from "html2pdf.js";
 
 function App() {
@@ -8,6 +8,7 @@ function App() {
   const [Quantity, setQuantity] = useState("");
   const [Amount, setAmount] = useState("");
   const [billData, setBillData] = useState([]);
+  const [finalAmount, setFinalAmount] = useState("");
   function addButton(e) {
     // e.preventDefault();
     if (Name && Item && Quantity && Amount) {
@@ -18,7 +19,7 @@ function App() {
       // setItem("");
       // setQuantity("");
       // setAmount("");
-      console.log(billData); 
+      console.log(billData);
     }
   }
   function handleRemove(index) {
@@ -29,24 +30,58 @@ function App() {
   //   window.print();
   // }
 
+  function ensureTableRows() {
+    const tableBody = document.querySelector("table tbody");
+    const rows = tableBody.querySelectorAll("tr").length;
 
-function printBill() {
-  // Select the element you want to convert to PDF
-  const element = document.querySelector(".todoList-div"); // Adjust the selector to match your bill container
+    const minimumRows = 8;
+    for (let i = rows; i < minimumRows; i++) {
+      const emptyRow = document.createElement("tr");
+      emptyRow.innerHTML = `
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      `;
+      tableBody.appendChild(emptyRow);
+    }
+  }
 
-  // Configure options for the PDF
-  const options = {
-    margin: 0, // Remove extra margins
-    filename: "bill.pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 3, width: element.offsetWidth }, // Use the container's full width
-    jsPDF: { unit: "px", format: "a6", orientation: "portrait" },
-  };
+  function printBill() {
+    const element = document.querySelector(".todoList-div");
+    const removeButtons = document.querySelectorAll(".Remove-button-td");
+    removeButtons.forEach(button => (button.style.display = "none"));
+    ensureTableRows()
+    const options = {
+      margin: [20, -20, -20, -20],
+      filename: `${Name}.pdf`,
+      image: { type: "jpeg", quality: 1.0 },
+      html2canvas: {
+        scale: 4,
+        useCORS: true,
+        windowWidth: document.body.scrollWidth,
+      },
+      jsPDF: {
+        unit: "pt",
+        format: [element.scrollWidth, element.scrollHeight],
+        orientation: "portrait",
+      },
+    };
+    html2pdf().set(options).from(element).save().then(() => {
+      removeButtons.forEach(button => (button.style.display = ""));
+    });
+  }
 
-  // Convert the element to a PDF
-  html2pdf().set(options).from(element).save();
-}
-
+  useEffect(() => {
+    let totalAmt = 0;
+    billData.forEach(element => {
+      let sum = element.Quantity * element.Amount;
+      totalAmt += sum;
+      console.log(element);
+    });
+    setFinalAmount(totalAmt)
+  }, [billData])
 
 
   return (
@@ -77,7 +112,7 @@ function printBill() {
         </form>
 
       </div>
-      <div className="todoList-div">
+      <div className="todoList-div" >
 
         <div className="header1">
           <h1>रुपाली स्टेशनरी अँड झेरॉक्स</h1>
@@ -136,7 +171,7 @@ function printBill() {
 
         <div className="footer">
           <p><b>GSTIN:</b> 27ADJPT0693G1Z6</p>
-          <p>अक्षरी रु: __________________________</p>
+          <p>अक्षरी रु: {finalAmount}</p>
           <p><b>टीप:</b> एकदा विकलेला माल परत घेतला जाणार नाही.</p>
         </div>
       </div>
