@@ -1,16 +1,26 @@
 import './App.css';
 import { useState, useEffect } from "react";
 import html2pdf from "html2pdf.js";
+import Sanscript from "sanscript";
+import useNameSpeechHook from './useNameSpeechHook';
+import useSpeechHook from './useSpeechHook';
 
 function App() {
   const [Name, setName] = useState("");
+  const [FinalName, setFinalName] = useState("");
+  const [OutputItemName, setItemNameOutput] = useState("");
+  const [Address, SetAddress] = useState("");
+  const [currentDate, SetCurrentDate] = useState("");
+  const [number, setNumber] = useState("");
   const [Item, setItem] = useState("");
   const [Quantity, setQuantity] = useState("");
   const [Amount, setAmount] = useState("");
   const [billData, setBillData] = useState([]);
   const [finalAmount, setFinalAmount] = useState("");
+  const [debouncedInput, setDebouncedInput] = useState("");
+  const { fieldData, transcript, listening, startListening, stopListening, resetFieldTranscript, setLanguage, language, } = useSpeechHook();
+  const { transcript: customerName, startListening: startCustomerNameListening, stopListening: stopCustomerNameListening,resetTranscript: resetCustomerName } = useNameSpeechHook();
   function addButton(e) {
-    // e.preventDefault();
     if (Name && Item && Quantity && Amount) {
       e.preventDefault();
       let data = { Name, Item, Quantity, Amount };
@@ -19,17 +29,63 @@ function App() {
       // setItem("");
       // setQuantity("");
       // setAmount("");
-      console.log(billData);
     }
   }
+
+  useEffect(() => {
+    let current = new Date().toLocaleDateString();
+    SetCurrentDate(current)
+  }, [])
+
+  useEffect(() => {
+    setName(fieldData.customerName || "");
+    SetAddress(fieldData.customerAddress || "");
+    setItemNameOutput(fieldData.ItemName || "");
+  }, [transcript]);
+
+  //Testing 
+  // useEffect(() => {
+  //   setName((prev) => {
+  //     return prev.includes(customerName) ? prev : prev + " " + customerName;
+  //   });
+  // }, [customerName]);
+  // useEffect(() => {
+  //   if (transcript.trim() !== "") {
+  //     setName((prev) => (prev ? prev + " " + transcript : transcript));
+  //     setTimeout(() => resetCustomerName(), 100); 
+  //   }
+  // }, [customerName]);
+  useEffect(() => {
+    if (customerName.trim() !== "") {
+      setFinalName(Name + " " + customerName); 
+      resetCustomerName(); 
+    }
+  }, [customerName]);
+  useEffect(()=>{
+    setFinalName(Name)
+  },[Name])
+
+  //TESTING END
   function handleRemove(index) {
     let data = billData.filter((value, i) => i !== index);
     setBillData(data);
   }
-  // function printBill(){
-  //   window.print();
-  // }
 
+
+  //Changing Text to marathi
+  const setItemNameHandler = (e) => {
+    setItem(e.target.value);
+    setItemNameOutput(e.target.value)
+  }
+  function handleSpace(e) {
+    if (e.key === " ") {
+      console.log("Space");
+      const convertedText = Sanscript.t(e.target.value, "itrans", "devanagari");
+      setItemNameOutput(convertedText);
+    }
+
+  }
+  //Adding Rows Dynamically
   function ensureTableRows() {
     const tableBody = document.querySelector("table tbody");
     const rows = tableBody.querySelectorAll("tr").length;
@@ -47,7 +103,7 @@ function App() {
       tableBody.appendChild(emptyRow);
     }
   }
-
+  //Printing PDF
   function printBill() {
     const element = document.querySelector(".todoList-div");
     const removeButtons = document.querySelectorAll(".Remove-button-td");
@@ -88,17 +144,35 @@ function App() {
     <div className="main-div">
       <div className="form-div">
         <form>
-          <div className="form-group">
+          <div className="form-group recorder-group">
+            <div className="controls">
+              {/* <span className="btn btn-start" onClick={() => startListening("customerName")}>प्रारंभ करा</span>
+              <span className="btn btn-stop" onClick={stopListening}>थांबवा</span> */}
+              <span className="btn btn-start" onClick={startCustomerNameListening}>प्रारंभ करा</span>
+              <span className="btn btn-stop" onClick={()=>{stopCustomerNameListening()}}>थांबवा</span>
+            </div>
             <label htmlFor="customerName">ग्राहकाचे नाव</label>
-            <input type="text" value={Name} placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setName(e.target.value) }} />
+            <input type="text" value={FinalName} className="btn-space" placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setName(e.target.value) }} />
           </div>
-          {/* <div className="form-group">
+          <div className="form-group recorder-group">
+            <div className="controls">
+              <span className="btn btn-start" onClick={() => startListening("customerAddress")}>प्रारंभ करा</span>
+              <span className="btn btn-stop" onClick={stopListening}>थांबवा</span>
+            </div>
             <label htmlFor="customerName">ग्राहकाचा पत्ता</label>
-            <input type="text" value={Name} placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setName(e.target.value) }} />
-          </div> */}
+            <input type="text" value={Address} className="btn-space" placeholder="उदा: पुणे" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} />
+          </div>
           <div className="form-group">
+            <label htmlFor="customerName">क्रम</label>
+            <input type="text" value={number} placeholder="उदा: 1" id="customerName nubmer-date" name="customerName" required onChange={(e) => { setNumber(e.target.value) }} />
+          </div>
+          <div className="form-group recorder-group">
+            <div className="controls">
+              <span className="btn btn-start" onClick={() => startListening("ItemName")}>प्रारंभ करा</span>
+              <span className="btn btn-stop" onClick={stopListening}>थांबवा</span>
+            </div>
             <label htmlFor="itemName">आयटमचे नाव</label>
-            <input type="text" value={Item} placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={(e) => { setItem(e.target.value) }} />
+            <input type="text" value={OutputItemName} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={setItemNameHandler} onKeyPress={handleSpace} />
           </div>
           <div className="form-group">
             <label htmlFor="itemQty">प्रमाण</label>
@@ -115,16 +189,26 @@ function App() {
       <div className="todoList-div" >
 
         <div className="header1">
-          <h1>रुपाली स्टेशनरी अँड झेरॉक्स</h1>
-          <p>सोळंकी टॉवर, शॉप नं. 11, एस. टी. स्टॅन्ड समोर, सासवड</p>
-          <p>मोबाइल: 8888133484</p>
-          <p>शालेय स्टेशनरी, ऑफिस स्टेशनरी, छपाई, गिफ्ट आर्टिकल्स, वाढदिवसासाठी साहित्य, झेरॉक्स, कलर झेरॉक्स, लॅमिनेशन, स्कॅनिंग, बाईंडिंग, मिळेल.</p>
+          <img src="./maaSaraswati.jpg" alt="First" className="header-img1" />
+          <span>
+            <h1>रुपाली स्टेशनरी अँड झेरॉक्स</h1>
+            <p>सोळंकी टॉवर, शॉप नं. 11, एस. टी. स्टॅन्ड समोर, सासवड</p>
+            <p>मोबाइल: 8888133484</p>
+
+          </span>
+          <img src="./logo.jpg" alt="Second" className="header-img2" />
         </div>
+        <p style={{ textAlign: "center", marginBottom: "30px" }}>
+          शालेय स्टेशनरी, ऑफिस स्टेशनरी, छपाई, गिफ्ट आर्टिकल्स, वाढदिवसासाठी साहित्य,
+          झेरॉक्स, कलर झेरॉक्स, लॅमिनेशन, स्कॅनिंग, बाईंडिंग, मिळेल.
+        </p>
 
         <div className="info-section">
           <div className="row">
-            <p><b>नंबर:</b> 509</p>
-            <p><b>दि:</b> 01/2025</p>
+            <p><b>नंबर:</b> 1</p>
+            <p className="date-Input"><b>दि: </b>
+              <input type="text" value={currentDate} placeholder="29/01/2025" id="customerName" name="customerName dateInput" required onChange={(e) => { SetCurrentDate(e.target.value) }} />
+            </p>
           </div>
           <div className="row">
             <p><b>नाव:</b> __________________________</p>
@@ -159,14 +243,13 @@ function App() {
                 </td>
               </tr>
             ))}
+          </tbody>
+          <tfoot>
             <tr>
-              <td>{billData.length + 1}</td>
-              <td>___________________</td>
-              <td>___________________</td>
-              <td>___________________</td>
+              <td colSpan="4"><b>एकूण :</b></td>
               <td>___________________</td>
             </tr>
-          </tbody>
+          </tfoot>
         </table>
 
         <div className="footer">
