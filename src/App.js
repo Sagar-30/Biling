@@ -44,26 +44,42 @@ function App() {
   }, [transcript]);
 
   //Testing 
+
   // useEffect(() => {
-  //   setName((prev) => {
-  //     return prev.includes(customerName) ? prev : prev + " " + customerName;
-  //   });
+  //   let newName = customerName;
+  //   setFinalName(Name + " " + newName);
+  //   console.log("Effect name",Name, FinalName);
+  //   // if (!FinalName && customerName.trim() !== "") {
+  //   //   setFinalName((prev) => prev + " " + customerName.trim());
+  //   // }
   // }, [customerName]);
-  // useEffect(() => {
-  //   if (transcript.trim() !== "") {
-  //     setName((prev) => (prev ? prev + " " + transcript : transcript));
-  //     setTimeout(() => resetCustomerName(), 100); 
-  //   }
-  // }, [customerName]);
+
+  useEffect(()=>{
+    console.log("name",Name, FinalName);
+    let newName = Name;
+    // setFinalName(FinalName + " " + newName);
+    // setName("")
+  },[Name])
+
   useEffect(() => {
-    if (customerName.trim() !== "") {
-      setFinalName(Name + " " + customerName); 
-      resetCustomerName(); 
+    console.log(customerName);
+    let newName = customerName.trim();
+    if (newName !== "") {
+      setFinalName((prev) => prev + " " + newName);  // Append only if it's a new value
+      console.log("Effect name", Name, FinalName);
+      resetCustomerName();
     }
   }, [customerName]);
-  useEffect(()=>{
-    setFinalName(Name)
-  },[Name])
+  
+  // useEffect(() => {
+  //   let newName = Name.trim();
+  //   if (newName !== "") {
+  //     setFinalName((prev) => prev + " " + newName);  // Append the Name value
+  //     setName("");  // Clear the Name field after updating FinalName
+  //   }
+  //   console.log("name", Name, FinalName);
+  // }, [Name]);
+  
 
   //TESTING END
   function handleRemove(index) {
