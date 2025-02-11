@@ -19,7 +19,7 @@ function App() {
   const [finalAmount, setFinalAmount] = useState("");
   const [debouncedInput, setDebouncedInput] = useState("");
   const { fieldData, transcript, listening, startListening, stopListening, resetFieldTranscript, setLanguage, language, } = useSpeechHook();
-  const { transcript: customerName, startListening: startCustomerNameListening, stopListening: stopCustomerNameListening,resetTranscript: resetCustomerName } = useNameSpeechHook();
+  const { transcript: customerName, listening: customerNameListening, startListening: startCustomerNameListening, stopListening: stopCustomerNameListening } = useNameSpeechHook();
   function addButton(e) {
     if (Name && Item && Quantity && Amount) {
       e.preventDefault();
@@ -44,42 +44,11 @@ function App() {
   }, [transcript]);
 
   //Testing 
-
-  // useEffect(() => {
-  //   let newName = customerName;
-  //   setFinalName(Name + " " + newName);
-  //   console.log("Effect name",Name, FinalName);
-  //   // if (!FinalName && customerName.trim() !== "") {
-  //   //   setFinalName((prev) => prev + " " + customerName.trim());
-  //   // }
-  // }, [customerName]);
-
-  useEffect(()=>{
-    console.log("name",Name, FinalName);
-    let newName = Name;
-    // setFinalName(FinalName + " " + newName);
-    // setName("")
-  },[Name])
-
-  useEffect(() => {
-    console.log(customerName);
-    let newName = customerName.trim();
-    if (newName !== "") {
-      setFinalName((prev) => prev + " " + newName);  // Append only if it's a new value
-      console.log("Effect name", Name, FinalName);
-      resetCustomerName();
-    }
-  }, [customerName]);
-  
-  // useEffect(() => {
-  //   let newName = Name.trim();
-  //   if (newName !== "") {
-  //     setFinalName((prev) => prev + " " + newName);  // Append the Name value
-  //     setName("");  // Clear the Name field after updating FinalName
-  //   }
-  //   console.log("name", Name, FinalName);
-  // }, [Name]);
-  
+  const displayedText = customerNameListening ? `${FinalName} ${customerName}`.trim() : FinalName;
+  const handleStop = () => {
+    stopCustomerNameListening();
+    setFinalName(displayedText); // Save combined text
+  };
 
   //TESTING END
   function handleRemove(index) {
@@ -89,18 +58,51 @@ function App() {
 
 
   //Changing Text to marathi
-  const setItemNameHandler = (e) => {
-    setItem(e.target.value);
-    setItemNameOutput(e.target.value)
-  }
+  // const setItemNameHandler = (e) => {
+  //   setItem(e.target.value);
+  //   transliterateText(e.target.value);
+  //   setItemNameOutput(e.target.value)
+  // }
   function handleSpace(e) {
     if (e.key === " ") {
-      console.log("Space");
-      const convertedText = Sanscript.t(e.target.value, "itrans", "devanagari");
-      setItemNameOutput(convertedText);
+      // console.log("Space");
+      // const convertedText = Sanscript.t(e.target.value, "itrans", "devanagari");
+      // setItemNameOutput(convertedText);
+      transliterate(e.target.value).then(console.log);
     }
-
   }
+
+  const setItemNameHandler = (e) => {
+    const inputText = e.target.value;
+    
+    // Convert English/Hinglish to Marathi in real-time
+    const marathiText = Sanscript.t(inputText, "itrans", "devanagari");
+    setItem(marathiText);
+    setItemNameOutput(marathiText);
+  };
+
+  async function transliterate(text) {
+    const url = `https://inputtools.google.com/request?itc=mr-t-i0-und&text=${encodeURIComponent(text)}&num=5`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data[0] === "SUCCESS") {
+        return data[1][0][1][0]; // First suggestion
+    } else {
+        return "Translation failed";
+    }
+}
+
+
+  // const setItemNameHandler = (e) => {
+  //   const inputText = e.target.value;
+  //   // Convert English/Hinglish to Marathi in real-time
+  //   const marathiText = toDevanagari(inputText);
+  //   setItem(marathiText);
+  //   setItemNameOutput(marathiText);
+  // };
+
   //Adding Rows Dynamically
   function ensureTableRows() {
     const tableBody = document.querySelector("table tbody");
@@ -155,20 +157,20 @@ function App() {
     setFinalAmount(totalAmt)
   }, [billData])
 
-
+  // console.log(customerNameListening)
   return (
     <div className="main-div">
       <div className="form-div">
         <form>
           <div className="form-group recorder-group">
             <div className="controls">
-              {/* <span className="btn btn-start" onClick={() => startListening("customerName")}>प्रारंभ करा</span>
-              <span className="btn btn-stop" onClick={stopListening}>थांबवा</span> */}
-              <span className="btn btn-start" onClick={startCustomerNameListening}>प्रारंभ करा</span>
-              <span className="btn btn-stop" onClick={()=>{stopCustomerNameListening()}}>थांबवा</span>
+              {!customerNameListening ?
+                <span className="btn btn-start" onClick={startCustomerNameListening}>प्रारंभ करा</span> :
+                <span className="btn btn-stop" onClick={() => { handleStop() }}>थांबवा</span>
+              }
             </div>
             <label htmlFor="customerName">ग्राहकाचे नाव</label>
-            <input type="text" value={FinalName} className="btn-space" placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setName(e.target.value) }} />
+            <input type="text" value={displayedText} className="btn-space" placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setFinalName(e.target.value) }} />
           </div>
           <div className="form-group recorder-group">
             <div className="controls">
@@ -188,7 +190,7 @@ function App() {
               <span className="btn btn-stop" onClick={stopListening}>थांबवा</span>
             </div>
             <label htmlFor="itemName">आयटमचे नाव</label>
-            <input type="text" value={OutputItemName} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={setItemNameHandler} onKeyPress={handleSpace} />
+            <input type="text" value={OutputItemName} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={setItemNameHandler} onKeyPress={handleSpace}/>
           </div>
           <div className="form-group">
             <label htmlFor="itemQty">प्रमाण</label>
@@ -246,7 +248,7 @@ function App() {
           <tbody>
             {billData && billData.map((item, index) => (
               <tr key={index}>
-                {console.log("item", item)}
+                {/* {console.log("item", item)} */}
                 <td>{index + 1}</td>
                 <td>{item.Item}</td>
                 <td>{item.Quantity}</td>
