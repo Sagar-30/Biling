@@ -1,14 +1,13 @@
 import './App.css';
-import { useState, useEffect } from "react";
-import html2pdf from "html2pdf.js";
-import Sanscript from "sanscript";
-import useNameSpeechHook from './useNameSpeechHook';
-import useSpeechHook from './useSpeechHook';
+import { useState, useEffect, useRef } from "react";
+import useNameSpeechHook from './hooks/useNameSpeechHook';
+import useAddressSpeechHook from './hooks/useAddressSpeechHook';
+import { printBill, translateIntoMarathi } from './utils';
+import useItemNameSpeechHook from './hooks/useItemNameSpeechHook';
+import convertNumberToMarathi from './hooks/useNumberToWords';
 
 function App() {
-  const [Name, setName] = useState("");
   const [FinalName, setFinalName] = useState("");
-  const [OutputItemName, setItemNameOutput] = useState("");
   const [Address, SetAddress] = useState("");
   const [currentDate, SetCurrentDate] = useState("");
   const [number, setNumber] = useState("");
@@ -17,13 +16,40 @@ function App() {
   const [Amount, setAmount] = useState("");
   const [billData, setBillData] = useState([]);
   const [finalAmount, setFinalAmount] = useState("");
-  const [debouncedInput, setDebouncedInput] = useState("");
-  const { fieldData, transcript, listening, startListening, stopListening, resetFieldTranscript, setLanguage, language, } = useSpeechHook();
-  const { transcript: customerName, listening: customerNameListening, startListening: startCustomerNameListening, stopListening: stopCustomerNameListening } = useNameSpeechHook();
+  const [MarathiNumer, setMarathiNumer] = useState("");
+
+  const activeInput = useRef({
+    customerName: null,
+    customerAddress: null,
+    itemName: null
+  });
+
+  const {
+    transcript: customerName,
+    isListening: customerNameListening,
+    startListening: startCustomerNameListening,
+    stopListening: stopCustomerNameListening
+  } = useNameSpeechHook();
+
+  const {
+    transcript: customerAddress,
+    isListening: customerAddressListening,
+    startListening: startCustomerAddressListening,
+    stopListening: stopCustomerAddressListening
+  } = useAddressSpeechHook();
+
+  const {
+    transcript: ItemName,
+    isListening: ItemNameListening,
+    startListening: startItemNameListening,
+    stopListening: stopItemNameListening
+  } = useItemNameSpeechHook();
+
+  // List add and remove feature
   function addButton(e) {
-    if (Name && Item && Quantity && Amount) {
+    if (FinalName && Item && Quantity && Amount) {
       e.preventDefault();
-      let data = { Name, Item, Quantity, Amount };
+      let data = { FinalName, Item, Quantity, Amount };
       setBillData([...billData, data]);
       // setName("");
       // setItem("");
@@ -31,120 +57,69 @@ function App() {
       // setAmount("");
     }
   }
-
-  useEffect(() => {
-    let current = new Date().toLocaleDateString();
-    SetCurrentDate(current)
-  }, [])
-
-  useEffect(() => {
-    setName(fieldData.customerName || "");
-    SetAddress(fieldData.customerAddress || "");
-    setItemNameOutput(fieldData.ItemName || "");
-  }, [transcript]);
-
-  //Testing 
-  const displayedText = customerNameListening ? `${FinalName} ${customerName}`.trim() : FinalName;
-  const handleStop = () => {
-    stopCustomerNameListening();
-    setFinalName(displayedText); // Save combined text
-  };
-
-  //TESTING END
   function handleRemove(index) {
     let data = billData.filter((value, i) => i !== index);
     setBillData(data);
   }
 
+  useEffect(() => {
+    let current = new Date().toLocaleDateString();
+    SetCurrentDate(current)
+  }, []);
 
-  //Changing Text to marathi
-  // const setItemNameHandler = (e) => {
-  //   setItem(e.target.value);
-  //   transliterateText(e.target.value);
-  //   setItemNameOutput(e.target.value)
-  // }
-  function handleSpace(e) {
-    if (e.key === " ") {
-      // console.log("Space");
-      // const convertedText = Sanscript.t(e.target.value, "itrans", "devanagari");
-      // setItemNameOutput(convertedText);
-      transliterate(e.target.value).then(console.log);
-    }
-  }
-
-  const setItemNameHandler = (e) => {
-    const inputText = e.target.value;
-    
-    // Convert English/Hinglish to Marathi in real-time
-    const marathiText = Sanscript.t(inputText, "itrans", "devanagari");
-    setItem(marathiText);
-    setItemNameOutput(marathiText);
+  //Listening Feature 
+  const displayedText = customerNameListening ? `${FinalName} ${customerName}`.trim() : FinalName;
+  const handleStop = () => {
+    stopCustomerNameListening();
+    //setFinalName(displayedText); 
+    setFinalName(prev => `${prev} ${customerName}`.trim());
   };
 
-  async function transliterate(text) {
-    const url = `https://inputtools.google.com/request?itc=mr-t-i0-und&text=${encodeURIComponent(text)}&num=5`;
+  const displayedAddressText = customerAddressListening ? `${Address} ${customerAddress}`.trim() : Address;
+  const handleAddressStop = () => {
+    stopCustomerAddressListening();
+    //SetAddress(displayedAddressText);
+    SetAddress(prev => `${prev} ${customerAddress}`.trim());
+  };
 
-    const response = await fetch(url);
-    const data = await response.json();
+  const displayedItemNameText = ItemNameListening ? `${Item} ${ItemName}`.trim() : Item;
+  const handleItemNameStop = () => {
+    stopItemNameListening();
+    // setItem(displayedItemNameText);
+    setItem(prev => `${prev} ${ItemName}`.trim());
+  };
 
-    if (data[0] === "SUCCESS") {
-        return data[1][0][1][0]; // First suggestion
-    } else {
-        return "Translation failed";
-    }
-}
+  //Listening Feature END
 
+  
 
-  // const setItemNameHandler = (e) => {
-  //   const inputText = e.target.value;
-  //   // Convert English/Hinglish to Marathi in real-time
-  //   const marathiText = toDevanagari(inputText);
-  //   setItem(marathiText);
-  //   setItemNameOutput(marathiText);
-  // };
-
-  //Adding Rows Dynamically
-  function ensureTableRows() {
-    const tableBody = document.querySelector("table tbody");
-    const rows = tableBody.querySelectorAll("tr").length;
-
-    const minimumRows = 8;
-    for (let i = rows; i < minimumRows; i++) {
-      const emptyRow = document.createElement("tr");
-      emptyRow.innerHTML = `
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-      `;
-      tableBody.appendChild(emptyRow);
+  //Changing Text to marathi
+  function handleNameSpace(e) {
+    if (e.key === " ") {
+      translateIntoMarathi(e.target.value).then((data) => {
+        setFinalName(`${data}${" "}`)
+      }).catch((err) => {
+        console.log("Error in Name translation", err)
+      });
     }
   }
-  //Printing PDF
-  function printBill() {
-    const element = document.querySelector(".todoList-div");
-    const removeButtons = document.querySelectorAll(".Remove-button-td");
-    removeButtons.forEach(button => (button.style.display = "none"));
-    ensureTableRows()
-    const options = {
-      margin: [20, -20, -20, -20],
-      filename: `${Name}.pdf`,
-      image: { type: "jpeg", quality: 1.0 },
-      html2canvas: {
-        scale: 4,
-        useCORS: true,
-        windowWidth: document.body.scrollWidth,
-      },
-      jsPDF: {
-        unit: "pt",
-        format: [element.scrollWidth, element.scrollHeight],
-        orientation: "portrait",
-      },
-    };
-    html2pdf().set(options).from(element).save().then(() => {
-      removeButtons.forEach(button => (button.style.display = ""));
-    });
+  function handleAddressSpace(e) {
+    if (e.key === " ") {
+      translateIntoMarathi(e.target.value).then((data) => {
+        SetAddress(`${data}${" "}`)
+      }).catch((err) => {
+        console.log("Error in Address translation", err)
+      });
+    }
+  }
+  function handleItemNameSpace(e) {
+    if (e.key === " ") {
+      translateIntoMarathi(e.target.value).then((data) => {
+        setItem(`${data}${" "}`)
+      }).catch((err) => {
+        console.log("Error in Item Name translation", err)
+      });
+    }
   }
 
   useEffect(() => {
@@ -155,9 +130,9 @@ function App() {
       console.log(element);
     });
     setFinalAmount(totalAmt)
+    setMarathiNumer(convertNumberToMarathi(totalAmt));
   }, [billData])
 
-  // console.log(customerNameListening)
   return (
     <div className="main-div">
       <div className="form-div">
@@ -170,15 +145,17 @@ function App() {
               }
             </div>
             <label htmlFor="customerName">ग्राहकाचे नाव</label>
-            <input type="text" value={displayedText} className="btn-space" placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setFinalName(e.target.value) }} />
+            <input type="text" value={displayedText} className="btn-space" placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setFinalName(e.target.value) }} onKeyPress={(e) => handleNameSpace(e)} />
           </div>
           <div className="form-group recorder-group">
             <div className="controls">
-              <span className="btn btn-start" onClick={() => startListening("customerAddress")}>प्रारंभ करा</span>
-              <span className="btn btn-stop" onClick={stopListening}>थांबवा</span>
+              {!customerAddressListening ?
+                <span className="btn btn-start" onClick={startCustomerAddressListening}>प्रारंभ करा</span> :
+                <span className="btn btn-stop" onClick={() => { handleAddressStop() }}>थांबवा</span>
+              }
             </div>
             <label htmlFor="customerName">ग्राहकाचा पत्ता</label>
-            <input type="text" value={Address} className="btn-space" placeholder="उदा: पुणे" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} />
+            <input type="text" value={displayedAddressText} className="btn-space" placeholder="उदा: पुणे" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} onKeyPress={(e) => handleAddressSpace(e)} />
           </div>
           <div className="form-group">
             <label htmlFor="customerName">क्रम</label>
@@ -186,11 +163,13 @@ function App() {
           </div>
           <div className="form-group recorder-group">
             <div className="controls">
-              <span className="btn btn-start" onClick={() => startListening("ItemName")}>प्रारंभ करा</span>
-              <span className="btn btn-stop" onClick={stopListening}>थांबवा</span>
+              {!ItemNameListening ?
+                <span className="btn btn-start" onClick={startItemNameListening}>प्रारंभ करा</span> :
+                <span className="btn btn-stop" onClick={() => { handleItemNameStop() }}>थांबवा</span>
+              }
             </div>
             <label htmlFor="itemName">आयटमचे नाव</label>
-            <input type="text" value={OutputItemName} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={setItemNameHandler} onKeyPress={handleSpace}/>
+            <input type="text" value={displayedItemNameText} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={(e) => { setItem(e.target.value) }} onKeyPress={handleItemNameSpace} />
           </div>
           <div className="form-group">
             <label htmlFor="itemQty">प्रमाण</label>
@@ -229,10 +208,10 @@ function App() {
             </p>
           </div>
           <div className="row">
-            <p><b>नाव:</b> __________________________</p>
+            <p><b>नाव:</b> {FinalName}</p>
           </div>
           <div className="row">
-            <p><b>पत्ता:</b> __________________________</p>
+            <p><b>पत्ता:</b> {Address}</p>
           </div>
         </div>
         <table>
@@ -265,19 +244,19 @@ function App() {
           <tfoot>
             <tr>
               <td colSpan="4"><b>एकूण :</b></td>
-              <td>___________________</td>
+              <td>{finalAmount}</td>
             </tr>
           </tfoot>
         </table>
 
         <div className="footer">
           <p><b>GSTIN:</b> 27ADJPT0693G1Z6</p>
-          <p>अक्षरी रु: {finalAmount}</p>
+          <p><b>अक्षरी रु:</b> <b>{MarathiNumer}</b></p>
           <p><b>टीप:</b> एकदा विकलेला माल परत घेतला जाणार नाही.</p>
         </div>
       </div>
       <div className="print-btn-div">
-        <button onClick={printBill}>Print Bill</button>
+        <button onClick={() => printBill(FinalName)}>Print Bill</button>
       </div>
     </div>
   );

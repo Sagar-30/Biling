@@ -98,7 +98,7 @@ button:hover {
 }
 .btn-start {
   background-color: #4caf50; 
-  margin-right: 60px;
+  /* margin-right: 60px; */
 }
 .btn-stop {
   background-color: #f44336; 
