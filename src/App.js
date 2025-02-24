@@ -2,7 +2,7 @@ import './App.css';
 import { useState, useEffect, useRef } from "react";
 import useNameSpeechHook from './hooks/useNameSpeechHook';
 import useAddressSpeechHook from './hooks/useAddressSpeechHook';
-import { printBill, translateIntoMarathi } from './utils';
+import {printBill, translateIntoMarathi } from './utils';
 import useItemNameSpeechHook from './hooks/useItemNameSpeechHook';
 import convertNumberToMarathi from './hooks/useNumberToWords';
 
@@ -17,12 +17,8 @@ function App() {
   const [billData, setBillData] = useState([]);
   const [finalAmount, setFinalAmount] = useState("");
   const [MarathiNumer, setMarathiNumer] = useState("");
-
-  const activeInput = useRef({
-    customerName: null,
-    customerAddress: null,
-    itemName: null
-  });
+  const [SerialNumber, setSerialNumber] = useState("");
+  const [clearForm, setClearForm] = useState(true)
 
   const {
     transcript: customerName,
@@ -51,21 +47,47 @@ function App() {
       e.preventDefault();
       let data = { FinalName, Item, Quantity, Amount };
       setBillData([...billData, data]);
-      // setName("");
-      // setItem("");
-      // setQuantity("");
-      // setAmount("");
+      setItem("");
+      setQuantity("");
+      setAmount("");
     }
   }
   function handleRemove(index) {
     let data = billData.filter((value, i) => i !== index);
     setBillData(data);
   }
+  function clearFormData() {
+    setFinalName("");
+    SetAddress("");
+    setNumber("");
+    setItem("");
+    setQuantity("");
+    setAmount("");
+    setBillData([]);
+    setFinalAmount("");
+    setMarathiNumer("");
+  }
+  useEffect(() => {
+    setTimeout(() => {
+      clearFormData()
+    }, 2000)
+  }, [clearForm])
 
   useEffect(() => {
     let current = new Date().toLocaleDateString();
     SetCurrentDate(current)
   }, []);
+
+ //serial number logic
+  useEffect(() => {
+    let num = null;
+    num = localStorage.getItem("Sno");
+    console.log("LocalStorage number:", num)
+    if (num === null || num === "") {
+      localStorage.setItem("Sno", "1001");
+    };
+    setSerialNumber(localStorage.getItem("Sno"))
+  }, [clearForm])
 
   //Listening Feature 
   const displayedText = customerNameListening ? `${FinalName} ${customerName}`.trim() : FinalName;
@@ -91,7 +113,7 @@ function App() {
 
   //Listening Feature END
 
-  
+
 
   //Changing Text to marathi
   function handleNameSpace(e) {
@@ -196,13 +218,13 @@ function App() {
           <img src="./logo.jpg" alt="Second" className="header-img2" />
         </div>
         <p style={{ textAlign: "center", marginBottom: "30px" }}>
-          शालेय स्टेशनरी, ऑफिस स्टेशनरी, छपाई, गिफ्ट आर्टिकल्स, वाढदिवसासाठी साहित्य,
-          झेरॉक्स, कलर झेरॉक्स, लॅमिनेशन, स्कॅनिंग, बाईंडिंग, मिळेल.
+          शालेय स्टेशनरी, ऑफिस स्टेशनरी, प्रिंट, गिफ्ट आर्टिकल्स, वाढदिवसासाठी साहित्य,
+          झेरॉक्स, कलर झेरॉक्स, लॅमिनेशन, स्कॅनिंग, बाईंडिंग मिळेल.
         </p>
 
         <div className="info-section">
           <div className="row">
-            <p><b>नंबर:</b> 1</p>
+            <p><b>नंबर:</b>{SerialNumber}</p>
             <p className="date-Input"><b>दि: </b>
               <input type="text" value={currentDate} placeholder="29/01/2025" id="customerName" name="customerName dateInput" required onChange={(e) => { SetCurrentDate(e.target.value) }} />
             </p>
@@ -239,7 +261,8 @@ function App() {
                   </button>
                 </td>
               </tr>
-            ))}
+            ))
+            }
           </tbody>
           <tfoot>
             <tr>
@@ -256,7 +279,7 @@ function App() {
         </div>
       </div>
       <div className="print-btn-div">
-        <button onClick={() => printBill(FinalName)}>Print Bill</button>
+        <button onClick={() => { printBill(FinalName); setClearForm(!clearForm) }}>Print Bill</button>
       </div>
     </div>
   );

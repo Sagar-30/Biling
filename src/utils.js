@@ -1,12 +1,15 @@
 import html2pdf from "html2pdf.js";
 
-export function ensureTableRows() {
+function ensureTableRows() {
     const tableBody = document.querySelector("table tbody");
     const rows = tableBody.querySelectorAll("tr").length;
-  
+    
     const minimumRows = 8;
+    let addedRows = [];
     for (let i = rows; i < minimumRows; i++) {
       const emptyRow = document.createElement("tr");
+      // Mark the row as temporary for printing
+      emptyRow.setAttribute("data-print", "true");
       emptyRow.innerHTML = `
         <td>&nbsp;</td>
         <td>&nbsp;</td>
@@ -15,14 +18,21 @@ export function ensureTableRows() {
         <td>&nbsp;</td>
       `;
       tableBody.appendChild(emptyRow);
+      addedRows.push(emptyRow);
     }
+    return addedRows;
   }
   
   export function printBill(Name) {
+    let number = +localStorage.getItem("Sno");
+    localStorage.setItem("Sno", number + 1);
     const element = document.querySelector(".todoList-div");
     const removeButtons = document.querySelectorAll(".Remove-button-td");
     removeButtons.forEach(button => (button.style.display = "none"));
-    ensureTableRows();
+  
+    // Add empty rows for printing and keep track of them
+    const addedRows = ensureTableRows();
+  
     const options = {
       margin: [20, -20, -20, -20],
       filename: `${Name}.pdf`,
@@ -38,8 +48,11 @@ export function ensureTableRows() {
         orientation: "portrait",
       },
     };
+  
     html2pdf().set(options).from(element).save().then(() => {
       removeButtons.forEach(button => (button.style.display = ""));
+      // Remove the temporary rows added for printing
+      addedRows.forEach(row => row.remove());
     });
   }
 

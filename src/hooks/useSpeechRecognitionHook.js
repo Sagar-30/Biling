@@ -39,7 +39,7 @@ const useSpeechHook = (lang = 'mr-IN') => {
     if (recognition) {
       recognition.start();
       setIsListening(true);
-      setTranscript(''); // Reset transcript on new session
+      setTranscript(''); 
     }
   };
 
