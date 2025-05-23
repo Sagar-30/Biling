@@ -2,7 +2,7 @@ import './App.css';
 import { useState, useEffect, useRef } from "react";
 import useNameSpeechHook from './hooks/useNameSpeechHook';
 import useAddressSpeechHook from './hooks/useAddressSpeechHook';
-import {printBill, translateIntoMarathi } from './utils';
+import { printBill, translateIntoMarathi } from './utils';
 import useItemNameSpeechHook from './hooks/useItemNameSpeechHook';
 import convertNumberToMarathi from './hooks/useNumberToWords';
 
@@ -10,6 +10,7 @@ function App() {
   const [FinalName, setFinalName] = useState("");
   const [Address, SetAddress] = useState("");
   const [currentDate, SetCurrentDate] = useState("");
+  const [isEditingCurrentDate, setisEditingCurrentDate] = useState(false);
   const [number, setNumber] = useState("");
   const [Item, setItem] = useState("");
   const [Quantity, setQuantity] = useState("");
@@ -18,7 +19,9 @@ function App() {
   const [finalAmount, setFinalAmount] = useState("");
   const [MarathiNumer, setMarathiNumer] = useState("");
   const [SerialNumber, setSerialNumber] = useState("");
-  const [clearForm, setClearForm] = useState(true)
+  const [clearForm, setClearForm] = useState(true);
+  const editableRef = useRef(null);
+  let currentDateFocus = useRef();
 
   const {
     transcript: customerName,
@@ -46,10 +49,15 @@ function App() {
     if (FinalName && Item && Quantity && Amount) {
       e.preventDefault();
       let data = { FinalName, Item, Quantity, Amount };
-      setBillData([...billData, data]);
-      setItem("");
-      setQuantity("");
-      setAmount("");
+      if (billData.length < 20) {
+        setBillData([...billData, data]);
+      } else {
+        alert("आपण नंतर 20 आयटम जोडू शकत नाही");
+      }
+
+      //setItem("");
+      //setQuantity("");
+      //setAmount("");
     }
   }
   function handleRemove(index) {
@@ -77,8 +85,13 @@ function App() {
     let current = new Date().toLocaleDateString();
     SetCurrentDate(current)
   }, []);
+  
+  let handleCurrentDateInput = ()=>{
+    // const updatedContent = editableRef.current.innerHTML;
+    SetCurrentDate(editableRef.current.innerText);
+  }
 
- //serial number logic
+  //serial number logic
   useEffect(() => {
     let num = null;
     num = localStorage.getItem("Sno");
@@ -153,7 +166,7 @@ function App() {
     });
     setFinalAmount(totalAmt)
     setMarathiNumer(convertNumberToMarathi(totalAmt));
-  }, [billData])
+  }, [billData]);
 
   return (
     <div className="main-div">
@@ -180,7 +193,7 @@ function App() {
             <input type="text" value={displayedAddressText} className="btn-space" placeholder="उदा: पुणे" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} onKeyPress={(e) => handleAddressSpace(e)} />
           </div>
           <div className="form-group">
-            <label htmlFor="customerName">क्रम</label>
+            <label htmlFor="customerName">बिल नं</label>
             <input type="text" value={number} placeholder="उदा: 1" id="customerName nubmer-date" name="customerName" required onChange={(e) => { setNumber(e.target.value) }} />
           </div>
           <div className="form-group recorder-group">
@@ -194,12 +207,12 @@ function App() {
             <input type="text" value={displayedItemNameText} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={(e) => { setItem(e.target.value) }} onKeyPress={handleItemNameSpace} />
           </div>
           <div className="form-group">
-            <label htmlFor="itemQty">प्रमाण</label>
-            <input type="text" value={Quantity} placeholder="उदा: 2" id="itemQty" name="itemQty" required onChange={(e) => { setQuantity(e.target.value) }} />
+            <label htmlFor="itemQty">नग</label>
+            <input type="number" value={Quantity} placeholder="उदा: 2" id="itemQty" name="itemQty" required onChange={(e) => { setQuantity(e.target.value) }} />
           </div>
           <div className="form-group">
             <label htmlFor="itemAmount">रक्कम</label>
-            <input type="text" value={Amount} placeholder="उदा: 20" id="itemAmount" name="itemAmount" required onChange={(e) => { setAmount(e.target.value) }} />
+            <input type="number" value={Amount} placeholder="उदा: 20" id="itemAmount" name="itemAmount" required onChange={(e) => { setAmount(e.target.value) }} />
           </div>
           <button onClick={(e) => addButton(e)}>जोडा</button>
         </form>
@@ -210,24 +223,46 @@ function App() {
         <div className="header1">
           <img src="./maaSaraswati.jpg" alt="First" className="header-img1" />
           <span>
-            <h1>रुपाली स्टेशनरी अँड झेरॉक्स</h1>
+            <h1 style={{
+              fontFamily: "'Baloo Bhaijaan 2', cursive",
+              fontWeight: 800,
+              fontSize: "50px",
+              textAlign: "center",
+              color: "#b30000",
+              marginBottom: "5px"
+            }}>रुपाली स्टेशनर्स अ‍ॅण्ड झेरॉक्स</h1>
             <p>सोळंकी टॉवर, शॉप नं. 11, एस. टी. स्टॅन्ड समोर, सासवड</p>
-            <p>मोबाइल: 8888133484</p>
+            <p>मोबाइल: 9881832458</p>
 
           </span>
           <img src="./logo.jpg" alt="Second" className="header-img2" />
         </div>
-        <p style={{ textAlign: "center", marginBottom: "30px" }}>
+        <h5 style={{
+          textAlign: "center",
+          marginBottom: "1px",
+          fontFamily: "'Baloo Bhaijaan 2', cursive",
+          fontWeight: 550,
+          fontSize: "30px"
+        }}>
           शालेय स्टेशनरी, ऑफिस स्टेशनरी, प्रिंट, गिफ्ट आर्टिकल्स, वाढदिवसासाठी साहित्य,
           झेरॉक्स, कलर झेरॉक्स, लॅमिनेशन, स्कॅनिंग, बाईंडिंग मिळेल.
-        </p>
+        </h5>
 
         <div className="info-section">
           <div className="row">
-            <p><b>नंबर:</b>{SerialNumber}</p>
-            <p className="date-Input"><b>दि: </b>
-              <input type="text" value={currentDate} placeholder="29/01/2025" id="customerName" name="customerName dateInput" required onChange={(e) => { SetCurrentDate(e.target.value) }} />
-            </p>
+            <p><b>बिल नं:</b>{SerialNumber}</p>
+            {/* <p className="date-Input"><b>दि: </b>
+            <span><input type="text" value={currentDate} onChange={(e)=>SetCurrentDate(e.target.value)} className="date-input-form hide-on-print"></input></span>
+              <span ref={editableRef} className="date-input-form hide-inside-form">{currentDate} </span>
+            </p> */}
+            <p className="date-Input">
+                  <b>दि: </b>
+                  {isEditingCurrentDate ? (
+                    <input type="text" value={currentDate} onChange={(e) => SetCurrentDate(e.target.value)} onBlur={() => setisEditingCurrentDate(false)} className="date-input-form" autoFocus/>
+                  ) : (
+                    <span ref={currentDateFocus} className="date-input-form" tabIndex={0} onFocus={() => setisEditingCurrentDate(true)}>{currentDate}</span>)
+                    }
+                </p>
           </div>
           <div className="row">
             <p><b>नाव:</b> {FinalName}</p>

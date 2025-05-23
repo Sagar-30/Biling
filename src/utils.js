@@ -28,7 +28,17 @@ function ensureTableRows() {
     localStorage.setItem("Sno", number + 1);
     const element = document.querySelector(".todoList-div");
     const removeButtons = document.querySelectorAll(".Remove-button-td");
+    const inputDateSpan = document.querySelectorAll(".hide-inside-form");
+    const DateSpan = document.querySelectorAll(".hide-on-print");
     removeButtons.forEach(button => (button.style.display = "none"));
+    inputDateSpan.forEach(button => (button.style.display = "none"));
+    // DateSpan.forEach(button => (button.style.display = "inline-block"));
+    // DateSpan.forEach(el => {
+    //   if (el?.classList?.remove) {
+    //     console.log(el)
+    //     el.classList.remove("hide-on-print");
+    //   }
+    // });
   
     // Add empty rows for printing and keep track of them
     const addedRows = ensureTableRows();
@@ -46,6 +56,7 @@ function ensureTableRows() {
         unit: "pt",
         format: [element.scrollWidth, element.scrollHeight],
         orientation: "portrait",
+        autoPaging: true,
       },
     };
   

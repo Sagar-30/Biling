@@ -1,6 +1,6 @@
 .main-div {
   min-height: 80vh;
-  background: #fffaf0;  
+  background: #fffaf0;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -11,7 +11,7 @@
 
 .form-div {
   padding: 20px;
-  background: #005f73; 
+  background: #005f73;
   border-radius: 8px;
   color: white;
   margin-bottom: 20px;
@@ -26,7 +26,7 @@ form {
 }
 
 .form-group {
-  width: calc(50% - 10px); 
+  width: calc(50% - 10px);
   display: flex;
   flex-direction: column;
 }
@@ -50,15 +50,34 @@ input:focus {
   border: 2px solid #004d99;
 }
 
-.date-Input{
+.date-Input {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 24px;
+  font-family: 'Noto Sans Devanagari', sans-serif;
 }
+
+.date-input-form {
+  font-size: 24px;
+  padding-right: 18px;
+  line-height: 1.2;
+  height: auto;
+  vertical-align: baseline;
+}
+
+.print-only {
+  display: none;
+}
+.hide-inside-form{
+  display: none;
+}
+
 button {
   width: 100%;
   padding: 12px;
-  background: #00a6a6; 
+  background: #00a6a6;
   color: white;
   border: none;
   border-radius: 5px;
@@ -73,14 +92,15 @@ button:hover {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
-.recorder-group{
+.recorder-group {
   position: relative;
   /* margin-bottom: 20px; */
 }
+
 .btn {
   position: absolute;
   right: 10px;
-  top:45%;
+  top: 45%;
   display: inline-block;
   padding: 8px 12px;
   font-size: 14px;
@@ -92,32 +112,36 @@ button:hover {
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+
 .btn-start {
-  background-color: #4caf50; 
+  background-color: #4caf50;
   /* margin-right: 60px; */
 }
+
 .btn-stop {
-  background-color: #f44336; 
+  background-color: #f44336;
 }
-.btn-space{
+
+.btn-space {
   padding-right: 16%;
 }
 
 .todoList-div {
   flex: 1;
   padding: 20px;
-  background: #f5f7fa; 
+  background: #f5f7fa;
   border-radius: 8px;
   box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
-  width: 100%; 
-  max-width: 100%; 
-  margin: 0 auto; 
-  box-sizing: border-box; 
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .todoList-div::-webkit-scrollbar {
@@ -125,7 +149,7 @@ button:hover {
 }
 
 .todoList-div::-webkit-scrollbar-thumb {
-  background: #004d99; 
+  background: #004d99;
   border-radius: 5px;
 }
 
@@ -152,25 +176,28 @@ button:hover {
 }
 
 .header1 h1 {
-  font-size: 24px;
+  /* font-size: 24px; */
   margin: 0;
-  color: #d2232a; 
+  color: #d2232a;
 }
 
 .header1 p {
   margin: 5px 0;
-  font-size: 14px;
+  /* font-size: 18px; */
+  font-size: 24px;
   line-height: 1.5;
+  font-weight: 650;
 }
 
 .header-img1 {
-  width: 200px; 
+  width: 200px;
   height: 200px;
   margin: 10px auto;
   display: block;
 }
+
 .header-img2 {
-  width: 200px; 
+  width: 200px;
   height: 180px;
   margin: 10px auto;
   display: block;
@@ -188,7 +215,8 @@ button:hover {
 
 .info-section p {
   margin: 0;
-  font-size: 14px;
+  /* font-size: 14px; */
+  font-size: 24px;
 }
 
 table {
@@ -197,11 +225,13 @@ table {
   margin-bottom: 20px;
 }
 
-table th, table td {
+table th,
+table td {
   border: 1px solid #000;
   padding: 10px;
   text-align: center;
-  font-size: 14px;
+  /* font-size: 14px; */
+  font-size: 26px;
 }
 
 table th {
@@ -211,7 +241,8 @@ table th {
 
 .footer {
   text-align: left;
-  font-size: 14px;
+  /* font-size: 14px; */
+  font-size: 19px;
 }
 
 .footer p {
@@ -223,51 +254,58 @@ table th {
 }
 
 /* Remove button */
-.Remove-button-td{
+.Remove-button-td {
   /* border: none; */
-  border:1px solid red;
+  border: 1px solid red;
 }
+
 .remove-button {
-  background-color: #ff4d4d; 
-  color: white; 
-  border: none; 
-  border-radius: 5px; 
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
   padding: 5px 10px;
-  font-size: 14px; 
-  cursor: pointer; 
+  font-size: 14px;
+  cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .remove-button:hover {
-  background-color: #cc0000; 
+  background-color: #cc0000;
 }
 
 .remove-button:active {
-  background-color: #a00000; 
+  background-color: #a00000;
 }
 
 .remove-button:focus {
-  outline: none; 
+  outline: none;
   box-shadow: 0 0 4px #ff4d4d;
 }
 
 
 
-@media print{
+@media print {
   .todoList-div {
-    width: 100vw; 
+    width: 100vw;
     max-width: 100%;
   }
+
   table {
-    width: 100%; 
+    width: 100%;
   }
-  .form-div{
+
+  .form-div {
     display: none;
   }
-  .Remove-button-td{
+
+  .Remove-button-td {
     display: none;
   }
-  .print-btn-div{
+
+  .print-btn-div {
     display: none;
   }
+  
+
 }
