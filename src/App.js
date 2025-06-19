@@ -191,7 +191,7 @@ function App() {
               }
             </div>
             <label htmlFor="customerName">ग्राहकाचे नाव</label>
-            <input type="text" value={displayedText} className="btn-space" placeholder="उदा: सिद्धेश" id="customerName" name="customerName" required onChange={(e) => { setFinalName(e.target.value) }} onKeyPress={(e) => handleNameSpace(e)} />
+            <input type="text" value={displayedText} className="btn-space" id="customerName" name="customerName" required onChange={(e) => { setFinalName(e.target.value) }} onKeyPress={(e) => handleNameSpace(e)} />
           </div>
           <div className="form-group recorder-group">
             <div className="controls">
@@ -201,11 +201,11 @@ function App() {
               }
             </div>
             <label htmlFor="customerName">ग्राहकाचा पत्ता</label>
-            <input type="text" value={displayedAddressText} className="btn-space" placeholder="उदा: पुणे" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} onKeyPress={(e) => handleAddressSpace(e)} />
+            <input type="text" value={displayedAddressText} className="btn-space" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} onKeyPress={(e) => handleAddressSpace(e)} />
           </div>
           <div className="form-group">
             <label htmlFor="billNumber">बिल नं</label>
-            <input type="number" value={billNumber} placeholder="उदा: 1" id="customerName nubmer-date" name="billNumber" required onChange={(e) => { setBillNumber(e.target.value) }} />
+            <input type="number" value={billNumber} id="customerName nubmer-date" name="billNumber" required onChange={(e) => { setBillNumber(e.target.value) }} />
           </div>
           <div className="form-group recorder-group">
             <div className="controls">
@@ -215,15 +215,15 @@ function App() {
               }
             </div>
             <label htmlFor="itemName">आयटमचे नाव</label>
-            <input type="text" value={displayedItemNameText} className="btn-space" placeholder="उदा: पेन" id="itemName" name="itemName" required onChange={(e) => { setItem(e.target.value) }} onKeyPress={handleItemNameSpace} />
+            <input type="text" value={displayedItemNameText} className="btn-space" id="itemName" name="itemName" required onChange={(e) => { setItem(e.target.value) }} onKeyPress={handleItemNameSpace} />
           </div>
           <div className="form-group">
             <label htmlFor="itemQty">नग</label>
-            <input type="number" value={Quantity} placeholder="उदा: 2" id="itemQty" name="itemQty" required onChange={(e) => { setQuantity(e.target.value) }} />
+            <input type="number" value={Quantity} id="itemQty" name="itemQty" required onChange={(e) => { setQuantity(e.target.value) }} />
           </div>
           <div className="form-group">
             <label htmlFor="itemAmount">रक्कम</label>
-            <input type="number" value={Amount} placeholder="उदा: 20" id="itemAmount" name="itemAmount" required onChange={(e) => { setAmount(e.target.value) }} />
+            <input type="number" value={Amount} id="itemAmount" name="itemAmount" required onChange={(e) => { setAmount(e.target.value) }} />
           </div>
           <button onClick={(e) => addButton(e)}>जोडा</button>
         </form>
