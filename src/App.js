@@ -11,7 +11,7 @@ function App() {
   const [Address, SetAddress] = useState("");
   const [currentDate, SetCurrentDate] = useState("");
   const [isEditingCurrentDate, setisEditingCurrentDate] = useState(false);
-  const [number, setNumber] = useState("");
+  const [billNumber, setBillNumber] = useState("");
   const [Item, setItem] = useState("");
   const [Quantity, setQuantity] = useState("");
   const [Amount, setAmount] = useState("");
@@ -20,6 +20,8 @@ function App() {
   const [MarathiNumer, setMarathiNumer] = useState("");
   const [SerialNumber, setSerialNumber] = useState("");
   const [clearForm, setClearForm] = useState(true);
+  const [resetLocalStorageNo, setResetLocalStorageNo] = useState("");
+  const [reload,setReload] = useState(true)
   const editableRef = useRef(null);
   let currentDateFocus = useRef();
 
@@ -55,9 +57,9 @@ function App() {
         alert("आपण नंतर 20 आयटम जोडू शकत नाही");
       }
 
-      //setItem("");
-      //setQuantity("");
-      //setAmount("");
+      setItem("");
+      setQuantity("");
+      setAmount("");
     }
   }
   function handleRemove(index) {
@@ -67,7 +69,7 @@ function App() {
   function clearFormData() {
     setFinalName("");
     SetAddress("");
-    setNumber("");
+    setBillNumber("");
     setItem("");
     setQuantity("");
     setAmount("");
@@ -85,11 +87,6 @@ function App() {
     let current = new Date().toLocaleDateString();
     SetCurrentDate(current)
   }, []);
-  
-  let handleCurrentDateInput = ()=>{
-    // const updatedContent = editableRef.current.innerHTML;
-    SetCurrentDate(editableRef.current.innerText);
-  }
 
   //serial number logic
   useEffect(() => {
@@ -168,8 +165,22 @@ function App() {
     setMarathiNumer(convertNumberToMarathi(totalAmt));
   }, [billData]);
 
+  function ResetBillNumberLocalStorage(){
+    const userConfirmed = window.confirm("रीसेट करण्यासाठी ठीक आहे?");
+  if (userConfirmed && resetLocalStorageNo) {
+    setReload(!reload);
+    localStorage.setItem("Sno", resetLocalStorageNo);
+  }
+  }
+
   return (
     <div className="main-div">
+      {/* Reset bill Number*/}
+      <div style={{margin:"2px"}}>
+        <input placeholder="बिल क्रमांक रीसेट करा" onChange={(e)=>setResetLocalStorageNo(e.target.value)} style={{border:"1px solid red"}}/>
+        <input type="submit" style={{cursor:"pointer", color:"red"}} onClick={ResetBillNumberLocalStorage}/>
+      </div>
+      {/* div */}
       <div className="form-div">
         <form>
           <div className="form-group recorder-group">
@@ -193,8 +204,8 @@ function App() {
             <input type="text" value={displayedAddressText} className="btn-space" placeholder="उदा: पुणे" id="customerName" name="customerName" required onChange={(e) => { SetAddress(e.target.value) }} onKeyPress={(e) => handleAddressSpace(e)} />
           </div>
           <div className="form-group">
-            <label htmlFor="customerName">बिल नं</label>
-            <input type="text" value={number} placeholder="उदा: 1" id="customerName nubmer-date" name="customerName" required onChange={(e) => { setNumber(e.target.value) }} />
+            <label htmlFor="billNumber">बिल नं</label>
+            <input type="number" value={billNumber} placeholder="उदा: 1" id="customerName nubmer-date" name="billNumber" required onChange={(e) => { setBillNumber(e.target.value) }} />
           </div>
           <div className="form-group recorder-group">
             <div className="controls">
@@ -226,7 +237,7 @@ function App() {
             <h1 style={{
               fontFamily: "'Baloo Bhaijaan 2', cursive",
               fontWeight: 800,
-              fontSize: "50px",
+              fontSize: "28px",
               textAlign: "center",
               color: "#b30000",
               marginBottom: "5px"
@@ -240,9 +251,10 @@ function App() {
         <h5 style={{
           textAlign: "center",
           marginBottom: "1px",
+          marginTop: "12px",
           fontFamily: "'Baloo Bhaijaan 2', cursive",
           fontWeight: 550,
-          fontSize: "30px"
+          fontSize: "16px"
         }}>
           शालेय स्टेशनरी, ऑफिस स्टेशनरी, प्रिंट, गिफ्ट आर्टिकल्स, वाढदिवसासाठी साहित्य,
           झेरॉक्स, कलर झेरॉक्स, लॅमिनेशन, स्कॅनिंग, बाईंडिंग मिळेल.
@@ -250,7 +262,7 @@ function App() {
 
         <div className="info-section">
           <div className="row">
-            <p><b>बिल नं:</b>{SerialNumber}</p>
+            <p><b>बिल नं:</b>{billNumber ? billNumber : SerialNumber}</p>
             {/* <p className="date-Input"><b>दि: </b>
             <span><input type="text" value={currentDate} onChange={(e)=>SetCurrentDate(e.target.value)} className="date-input-form hide-on-print"></input></span>
               <span ref={editableRef} className="date-input-form hide-inside-form">{currentDate} </span>
@@ -314,7 +326,7 @@ function App() {
         </div>
       </div>
       <div className="print-btn-div">
-        <button onClick={() => { printBill(FinalName); setClearForm(!clearForm) }}>Print Bill</button>
+        <button onClick={() => { printBill(FinalName,billNumber); setClearForm(!clearForm) }}>Print Bill</button>
       </div>
     </div>
   );

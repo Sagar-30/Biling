@@ -4,7 +4,7 @@ function ensureTableRows() {
     const tableBody = document.querySelector("table tbody");
     const rows = tableBody.querySelectorAll("tr").length;
     
-    const minimumRows = 8;
+    const minimumRows = 20;
     let addedRows = [];
     for (let i = rows; i < minimumRows; i++) {
       const emptyRow = document.createElement("tr");
@@ -23,28 +23,24 @@ function ensureTableRows() {
     return addedRows;
   }
   
-  export function printBill(Name) {
+  export function printBill(Name,billNumber) {
+    console.log(billNumber);
+    if(!billNumber){
     let number = +localStorage.getItem("Sno");
     localStorage.setItem("Sno", number + 1);
+    }
     const element = document.querySelector(".todoList-div");
     const removeButtons = document.querySelectorAll(".Remove-button-td");
     const inputDateSpan = document.querySelectorAll(".hide-inside-form");
     const DateSpan = document.querySelectorAll(".hide-on-print");
     removeButtons.forEach(button => (button.style.display = "none"));
     inputDateSpan.forEach(button => (button.style.display = "none"));
-    // DateSpan.forEach(button => (button.style.display = "inline-block"));
-    // DateSpan.forEach(el => {
-    //   if (el?.classList?.remove) {
-    //     console.log(el)
-    //     el.classList.remove("hide-on-print");
-    //   }
-    // });
   
     // Add empty rows for printing and keep track of them
     const addedRows = ensureTableRows();
   
     const options = {
-      margin: [20, -20, -20, -20],
+      margin: [5, -40],
       filename: `${Name}.pdf`,
       image: { type: "jpeg", quality: 1.0 },
       html2canvas: {
@@ -54,7 +50,7 @@ function ensureTableRows() {
       },
       jsPDF: {
         unit: "pt",
-        format: [element.scrollWidth, element.scrollHeight],
+        format: "a4",
         orientation: "portrait",
         autoPaging: true,
       },
@@ -66,6 +62,8 @@ function ensureTableRows() {
       addedRows.forEach(row => row.remove());
     });
   }
+
+  
 
   export async function translateIntoMarathi (text) {
     const url = `https://inputtools.google.com/request?itc=mr-t-i0-und&text=${encodeURIComponent(text)}&num=5`;
